@@ -1,0 +1,30 @@
+version: "3.1"
+
+services:
+  web:
+    image: registry.swarm.uo.techx.fr/xebiafrance/click-count:${VERSION}
+    depends_on:
+      - redis
+    deploy:
+      replicas: 3
+      labels:
+        - "traefik.port=8080"
+        - "traefik.docker.network=traefik-net"
+        - "traefik.frontend.rule=Host:click-count.swarm.uo.techx.fr"
+    networks:
+      - default
+      - traefik-net
+  redis:
+    image: redis
+    command: redis-server --appendonly yes
+    volumes:
+      - swarm-click-count-volume:/data
+
+volumes:
+  swarm-click-count-volume:
+    driver: rexray/ebs:latest
+
+networks:
+  default:
+  traefik-net:
+    external: true
